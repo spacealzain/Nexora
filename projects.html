@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEXORA | مشاريعنا العقارية</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display & Noto Sans Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #010B28;
+            --gold: #C5A059;
+            --gold-light: #dfc28d;
+        }
+        
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            font-family: 'Noto Sans Arabic', system-ui, -apple-system, sans-serif;
+            scroll-behavior: smooth;
+            background-color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .font-serif { font-family: 'Playfair Display', serif; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--navy); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px) saturate(160%);
+            -webkit-backdrop-filter: blur(15px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-glass-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            left: 0;
+            background: rgba(1, 11, 40, 0.98);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .dropdown-active .custom-glass-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .glass-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .modal-bg {
+            background: rgba(1, 11, 40, 0.9);
+            backdrop-filter: blur(8px);
+        }
+
+        #mobile-menu {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(1, 11, 40, 0.95);
+            backdrop-filter: blur(20px);
+        }
+
+        .hero-parallax { 
+            will-change: transform;
+            filter: blur(8px);
+            transform: scale(1.1);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold) 0%, #b38d41 100%);
+            transition: all 0.4s ease;
+        }
+
+        .property-card {
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .property-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgba(1, 11, 40, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.8rem !important; }
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed w-full z-[1000] transition-all duration-500 py-4 md:py-6">
+        <div class="container mx-auto px-4 md:px-12 flex justify-between items-center">
+            <div class="flex items-center gap-3 group cursor-pointer" onclick="window.location.href='index.html'">
+                <div class="w-8 h-8 md:w-10 md:h-10 transition-transform group-hover:rotate-[360deg] duration-1000">
+                    <svg viewBox="0 0 100 100" class="w-full h-full fill-[#C5A059]">
+                        <rect x="40" y="20" width="20" height="60" />
+                        <rect x="25" y="40" width="15" height="40" />
+                        <rect x="60" y="40" width="15" height="40" />
+                        <path d="M10 85 Q50 75 90 85 L90 88 Q50 78 10 88 Z" />
+                    </svg>
+                </div>
+                <span class="text-xl md:text-2xl font-serif font-bold text-white tracking-widest uppercase">NEXORA</span>
+            </div>
+
+            <!-- Desktop Links -->
+            <div class="hidden lg:flex items-center gap-10">
+                <a href="index" class="text-white/80 hover:text-[#C5A059] transition-all text-sm font-bold tracking-widest uppercase">الرئيسية</a>
+                <a href="#projects-grid" class="text-[#C5A059] transition-all text-sm font-bold tracking-widest uppercase border-b-2 border-[#C5A059] pb-1">مشاريعنا</a>
+                <button onclick="openContactModal()" class="btn-gold text-[#010B28] px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform">تواصل معنا</button>
+            </div>
+
+            <!-- Mobile Toggle -->
+            <button id="menu-btn" class="lg:hidden text-white p-2" aria-label="Toggle Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="menu-overlay" class="fixed inset-0 z-[1050] hidden bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    <div id="mobile-menu" class="fixed inset-x-0 bottom-0 z-[1100] translate-y-full rounded-t-[2.5rem] p-8 pb-12 lg:hidden shadow-2xl">
+        <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mb-8"></div>
+        <div class="flex flex-col gap-6 text-right">
+            <a href="index" onclick="closeMobileMenu()" class="text-2xl font-serif font-bold text-white py-4 border-b border-white/5">الرئيسية</a>
+            <a href="#projects-grid" onclick="closeMobileMenu()" class="text-2xl font-serif font-bold text-[#C5A059] py-4 border-b border-white/5">مشاريعنا</a>
+            <button onclick="closeMobileMenu(); openContactModal();" class="btn-gold text-[#010B28] w-full py-5 rounded-2xl font-bold text-xl mt-4 shadow-lg">تواصل معنا</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-[90vh] flex flex-col items-center justify-center pt-24 md:pt-32 pb-20 z-[50]">
+        <div class="absolute inset-0 z-0 overflow-hidden"> 
+            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover hero-parallax" alt="Luxury Real Estate">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#010B28] via-[#010B28]/60 to-[#010B28]/90"></div>
+        </div>
+
+        <div class="relative z-10 container mx-auto px-6 text-center">
+            <div class="inline-block px-4 py-1.5 md:px-6 md:py-2 rounded-full border border-[#C5A059]/40 bg-[#C5A059]/10 text-[#C5A059] text-[10px] md:text-sm font-bold tracking-[0.3em] uppercase mb-6 md:mb-10 backdrop-blur-md">
+                PROJECTS NEXORA
+            </div>
+
+            <h1 class="hero-title text-4xl md:text-8xl lg:text-9xl font-serif font-bold text-white mb-6 leading-tight reveal">
+                NEXORA <br/>
+                <span class="gold-gradient-text text-xl md:text-5xl font-sans font-light block mt-4 uppercase tracking-widest">Property Management</span>
+            </h1>
+
+            <!-- SEARCH BAR -->
+            <div class="w-full max-w-5xl mx-auto mt-10 md:mt-16 reveal relative z-[100]">
+                <div class="glass-panel p-4 md:p-4 rounded-[2rem] md:rounded-full">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+                        
+                        <div class="relative" id="type-dropdown">
+                            <div class="glass-item rounded-xl md:rounded-full px-5 py-3 md:py-3 flex flex-col text-right h-full justify-center cursor-pointer" onclick="toggleDropdown('type-dropdown')">
+                                <label class="text-[10px] text-[#C5A059] font-bold mb-0.5 uppercase tracking-tighter">نوع العقار</label>
+                                <div class="text-white text-sm font-bold flex justify-between items-center">
+                                    <span id="type-label">جميع الأنواع</span>
+                                    <svg class="w-4 h-4 text-[#C5A059]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                            <div class="custom-glass-menu text-right overflow-hidden shadow-2xl">
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('type-label', 'جميع الأنواع', 'type-dropdown')">جميع الأنواع</div>
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('type-label', 'شقة', 'type-dropdown')">شقة</div>
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('type-label', 'فيلا', 'type-dropdown')">فيلا</div>
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('type-label', 'مخزن', 'type-dropdown')">مخزن</div>
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('type-label', 'محل', 'type-dropdown')">محل</div>
+                            </div>
+                        </div>
+
+                        <div class="relative" id="status-dropdown">
+                            <div class="glass-item rounded-xl md:rounded-full px-5 py-3 md:py-3 flex flex-col text-right h-full justify-center cursor-pointer" onclick="toggleDropdown('status-dropdown')">
+                                <label class="text-[10px] text-[#C5A059] font-bold mb-0.5 uppercase tracking-tighter">الحالة</label>
+                                <div class="text-white text-sm font-bold flex justify-between items-center">
+                                    <span id="status-label">جميع الحالات</span>
+                                    <svg class="w-4 h-4 text-[#C5A059]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+                            </div>
+                            <div class="custom-glass-menu text-right overflow-hidden shadow-2xl">
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('status-label', 'جميع الحالات', 'status-dropdown')">جميع الحالات</div>
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('status-label', 'متاح', 'status-dropdown')">متاح</div>
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('status-label', 'مباع', 'status-dropdown')">مباع</div>
+                                <div class="px-6 py-4 text-white hover:bg-[#C5A059] hover:text-[#010B28] font-bold cursor-pointer" onclick="selectOption('status-label', 'مؤجر', 'status-dropdown')">مؤجر</div>
+                            </div>
+                        </div>
+
+                        <div class="glass-item rounded-xl md:rounded-full px-5 py-3 md:py-3 flex flex-col text-right justify-center">
+                            <label class="text-[10px] text-[#C5A059] font-bold mb-0.5 uppercase tracking-tighter">السعر من</label>
+                            <input id="min-price" type="number" placeholder="0" class="bg-transparent text-white text-sm outline-none font-bold placeholder:text-white/30 text-right w-full">
+                        </div>
+
+                        <div class="glass-item rounded-xl md:rounded-full px-5 py-3 md:py-3 flex flex-col text-right justify-center">
+                            <label class="text-[10px] text-[#C5A059] font-bold mb-0.5 uppercase tracking-tighter">السعر إلى</label>
+                            <input id="max-price" type="number" placeholder="الأعلى" class="bg-transparent text-white text-sm outline-none font-bold placeholder:text-white/30 text-right w-full">
+                        </div>
+
+                        <button onclick="handleSearch()" class="btn-gold text-[#010B28] rounded-xl md:rounded-full w-full py-4 md:py-0 md:h-full flex items-center justify-center gap-3 font-bold text-sm transition-all shadow-xl active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            بحث 
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Projects Grid -->
+    <section id="projects-grid" class="py-20 md:py-32 bg-white relative z-10 min-h-[400px]">
+        <div class="container mx-auto px-4 md:px-12">
+            <div id="no-results" class="hidden text-center py-20">
+                <h3 class="text-2xl text-slate-400 font-bold">عذراً، لم يتم العثور على عقارات تطابق بحثك.</h3>
+            </div>
+            <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                <!-- Projects injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Add Property CTA -->
+    <section class="py-16 bg-slate-50">
+        <div class="container mx-auto px-4 text-center">
+            <div class="max-w-3xl mx-auto bg-[#010B28] rounded-[2.5rem] p-8 md:p-16 relative overflow-hidden shadow-2xl">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[#C5A059]/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <h2 class="text-3xl md:text-5xl font-serif font-bold text-white mb-6">هل تريد عرض عقارك ؟</h2>
+                <p class="text-white/60 mb-10 text-lg">نحن في NEXORA نساعدك في بيع أو تأجير عقارك بأفضل سعر وفي أسرع وقت ممكن.</p>
+                <!-- FIXED BUTTON: Added whitespace-nowrap and responsive font size/padding -->
+                <a href="https://wa.me/201283462502" target="_blank" class="btn-gold text-[#010B28] px-6 md:px-12 py-5 rounded-full font-bold text-lg md:text-xl inline-flex items-center gap-3 md:gap-4 hover:scale-105 transition-transform shadow-xl whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.29-4.171c1.52.891 3.01 1.348 4.636 1.349 5.457 0 9.897-4.44 9.899-9.897.001-2.644-1.03-5.13-2.903-7.003-1.874-1.873-4.361-2.903-7.006-2.904-5.456 0-9.896 4.441-9.898 9.898-.001 1.748.459 3.453 1.328 4.956l-1.02 3.726 3.824-.999zm11.367-7.4c-.273-.14-.329-.233-.601-.373-.272-.14-1.61-.794-1.861-.885-.25-.09-.432-.136-.615.14-.182.273-.705.885-.864 1.068-.159.183-.318.205-.591.064-.272-.14-1.15-.423-2.189-1.353-.809-.724-1.355-1.618-1.514-1.891-.159-.273-.017-.42.12-.558.123-.124.272-.318.409-.477.136-.16.182-.273.272-.455.09-.182.046-.341-.023-.481-.069-.14-.615-1.478-.842-2.025-.22-.53-.443-.457-.615-.466l-.523-.008c-.182 0-.477.068-.727.341s-.954.932-.954 2.274 1.023 2.638 1.159 2.82c.136.182 2.013 3.074 4.877 4.31.682.294 1.214.47 1.628.601.684.218 1.307.187 1.8.113.55-.082 1.61-.659 1.838-1.296.227-.637.227-1.183.159-1.296-.069-.113-.25-.182-.523-.322z"/></svg>
+                    أضف عقارك الآن
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="absolute inset-0 modal-bg" onclick="closeDetails()"></div>
+        <div class="relative bg-white w-full max-w-lg rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 shadow-2xl transform scale-95 transition-all duration-300" id="modalContent">
+            <button onclick="closeDetails()" class="absolute top-6 left-6 text-[#010B28] p-2 hover:bg-slate-100 rounded-full transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <h2 id="m-title" class="text-2xl md:text-3xl font-serif font-bold text-[#010B28] mb-8 text-right">---</h2>
+            <div class="space-y-4 md:space-y-6 text-right text-sm md:text-base">
+                <div class="flex justify-between items-center border-b border-slate-50 pb-3 flex-row-reverse"><span class="text-[#C5A059] font-bold text-xs uppercase">النوع</span><span id="m-type" class="font-bold">---</span></div>
+                <div class="flex justify-between items-center border-b border-slate-50 pb-3 flex-row-reverse"><span class="text-[#C5A059] font-bold text-xs uppercase">السعر</span><span id="m-price" class="font-bold text-[#C5A059]">---</span></div>
+                <div class="flex justify-between items-center border-b border-slate-50 pb-3 flex-row-reverse"><span class="text-[#C5A059] font-bold text-xs uppercase">المساحة</span><span id="m-area" class="font-bold">---</span></div>
+                <div class="flex justify-between items-center border-b border-slate-50 pb-3 flex-row-reverse"><span class="text-[#C5A059] font-bold text-xs uppercase">الموقع</span><span id="m-location" class="font-bold text-xs">---</span></div>
+                <div class="flex justify-between items-center border-b border-slate-50 pb-3 flex-row-reverse"><span class="text-[#C5A059] font-bold text-xs uppercase">الحالة</span><span id="m-status" class="font-bold">---</span></div>
+            </div>
+            <button onclick="openContactModal()" class="btn-gold text-[#010B28] w-full mt-10 py-4 rounded-2xl font-bold shadow-lg uppercase tracking-widest">تواصل الآن</button>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="fixed inset-0 z-[2100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="absolute inset-0 modal-bg" onclick="closeContactModal()"></div>
+        <div class="relative bg-white w-[90%] max-w-sm rounded-[2.5rem] p-10 shadow-2xl transform scale-95 transition-all duration-300 text-center" id="contactContent">
+            <h3 class="text-xl md:text-2xl font-serif font-bold text-[#010B28] mb-8">وسيلة التواصل</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <a href="https://wa.me/201212794955" target="_blank" class="flex items-center justify-center gap-4 bg-[#25D366] text-white py-4 rounded-xl font-bold shadow-lg hover:brightness-110 transition-all">WhatsApp</a>
+                <a href="tel:01212794955" class="flex items-center justify-center gap-4 bg-[#010B28] text-white py-4 rounded-xl font-bold shadow-lg hover:scale-105 transition-all">اتصال مباشر</a>
+            </div>
+            <button onclick="closeContactModal()" class="mt-6 text-gray-400 text-xs font-bold uppercase tracking-widest">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#010B28] text-white pt-20 pb-12">
+        <div class="container mx-auto px-6 lg:px-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <div class="space-y-6 text-right">
+                    <div class="flex items-center gap-3 justify-end md:justify-start flex-row-reverse">
+                        <div class="w-10 h-10 fill-[#C5A059]">
+                            <svg viewBox="0 0 100 100"><rect x="40" y="20" width="20" height="60" /><rect x="25" y="40" width="15" height="40" /><rect x="60" y="40" width="15" height="40" /><path d="M10 85 Q50 75 90 85 L90 88 Q50 78 10 88 Z" /></svg>
+                        </div>
+                        <span class="text-3xl font-serif font-bold tracking-widest uppercase">NEXORA</span>
+                    </div>
+                    <p class="text-white/60 text-sm max-w-md">لإدارة العقارات نساعدك تبيع تأجر ، أو تدير عقارك بكل احترافية في مصر والخليج.</p>
+                    
+                    <!-- Social Links Added Here -->
+                    <div class="flex items-center gap-4 justify-end md:justify-start flex-row-reverse mt-6">
+                        <a href="https://www.facebook.com/share/1GC7bu7rfT/" target="_blank" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-[#C5A059] hover:border-[#C5A059] transition-all group">
+                            <svg class="w-5 h-5 fill-white group-hover:fill-[#010B28]" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+                        </a>
+                        <a href="https://www.instagram.com/nexora_pm?igsh=MXZ1end3cWgweHBieg==" target="_blank" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-[#C5A059] hover:border-[#C5A059] transition-all group">
+                            <svg class="w-5 h-5 fill-white group-hover:fill-[#010B28]" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="space-y-6 text-right">
+                    <h4 class="text-[#C5A059] font-bold text-xs uppercase tracking-widest">تواصل معنا</h4>
+                    <div class="text-white/80 space-y-2 text-sm">
+                        <p>Nexorapm@gmail.com</p>
+                        <p class="text-xl font-bold">01212794955</p>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-center">
+                <p class="text-white/30 text-[10px] uppercase">© 2026 NEXORA PROPERTY MANAGEMENT.</p>
+                <p class="text-white/50 text-[10px]">Web Developer By <a href="http://al-zain.site" target="_blank" class="text-[#C5A059]">Al-Zain</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const projectsData = [
+            { id: 1, title: 'Palm Hills', type: 'شقة', status: 'متاح', price: 20000000, area: '250 م²', location: 'الطريق الدولي الساحلي', image: '1.jpg' },
+            { id: 2, title: 'محل تجاري - سموحة', type: 'محل', status: 'متاح', price: 6000000, area: '60 م²', location: 'السوق التجاري خلف مول زهران', image: '2.jpg' },
+            { id: 3, title: 'شقة - كومباوند فيرندا (1)', type: 'شقة', status: 'متاح', price: 5000000, area: '131 م²', location: 'سموحة - ش النقل والهندسة - الدور 6', image: '3.jpg' },
+            { id: 4, title: 'شقة - كومباوند فيرندا (2)', type: 'شقة', status: 'متاح', price: 5000000, area: '131 م²', location: 'سموحة - ش النقل والهندسة - الدور 6', image: '4.jpg' },
+            { id: 5, title: 'شقة - كومباوند فيرندا (3)', type: 'شقة', status: 'متاح', price: 4600000, area: '116 م²', location: 'سموحة - ش النقل والهندسة - الدور 6', image: '5.jpg' }
+        ];
+
+        function renderProjects(data) {
+            const container = document.getElementById('projects-container');
+            const noResults = document.getElementById('no-results');
+            container.innerHTML = '';
+            
+            if (data.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                data.forEach(p => {
+                    const card = `
+                        <div class="property-card bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden border border-slate-100 shadow-lg reveal active">
+                            <div class="relative aspect-[4/5] overflow-hidden">
+                                <img src="${p.image}" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110" alt="${p.title}">
+                                <div class="absolute top-6 right-6 px-4 py-1.5 ${p.status === 'متاح' ? 'bg-[#C5A059]' : 'bg-[#010B28]'} text-white text-[10px] font-bold uppercase rounded-full shadow-lg"> ${p.status} </div>
+                            </div>
+                            <div class="p-8 md:p-10 text-right">
+                                <h3 class="text-2xl md:text-3xl font-serif font-bold text-[#010B28] mb-2">${p.title}</h3>
+                                <p class="text-gray-500 font-medium mb-6 flex items-center justify-end gap-2 text-xs">${p.location}<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#C5A059]"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path></svg></p>
+                                <div class="flex flex-col gap-1 mb-6 text-right">
+                                    <span class="text-[#C5A059] font-bold text-lg">${p.price.toLocaleString()} ج.م</span>
+                                    <span class="text-xs text-slate-400 font-bold">${p.type} | ${p.area}</span>
+                                </div>
+                                <button onclick="openDetails('${p.title}', '${p.type}', '${p.price.toLocaleString()} ج.م', '${p.area}', '${p.location}', '${p.status}')" class="w-full py-4 rounded-xl border-2 border-[#010B28] text-[#010B28] font-bold text-xs uppercase tracking-widest hover:bg-[#010B28] hover:text-white transition-all active:scale-95">التفاصيل</button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            }
+        }
+
+        function handleSearch() {
+            const typeFilter = document.getElementById('type-label').textContent;
+            const statusFilter = document.getElementById('status-label').textContent;
+            const minPrice = parseFloat(document.getElementById('min-price').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('max-price').value) || Infinity;
+
+            const filtered = projectsData.filter(p => {
+                const matchesType = (typeFilter === 'جميع الأنواع') || (p.type === typeFilter);
+                const matchesStatus = (statusFilter === 'جميع الحالات') || (p.status === statusFilter);
+                const matchesPrice = (p.price >= minPrice && p.price <= maxPrice);
+                return matchesType && matchesStatus && matchesPrice;
+            });
+
+            document.getElementById('projects-grid').scrollIntoView({ behavior: 'smooth' });
+            const container = document.getElementById('projects-container');
+            container.style.opacity = '0';
+            setTimeout(() => {
+                renderProjects(filtered);
+                container.style.opacity = '1';
+            }, 300);
+        }
+
+        window.onload = () => {
+            renderProjects(projectsData);
+        };
+
+        window.addEventListener('scroll', () => {
+            const parallax = document.querySelector('.hero-parallax');
+            const nav = document.getElementById('navbar');
+            let scroll = window.pageYOffset;
+            
+            if (parallax) {
+                parallax.style.transform = `scale(1.1) translateY(${scroll * 0.4}px)`;
+            }
+            
+            if (scroll > 50) {
+                nav.classList.add('bg-[#010B28]/95', 'backdrop-blur-md', 'py-3', 'shadow-2xl');
+                nav.classList.remove('py-4', 'md:py-6');
+            } else {
+                nav.classList.remove('bg-[#010B28]/95', 'backdrop-blur-md', 'py-3', 'shadow-2xl');
+                nav.classList.add('py-4', 'md:py-6');
+            }
+        });
+
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+
+        function openMobileMenu() {
+            menuOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                menuOverlay.classList.add('opacity-100');
+                mobileMenu.classList.remove('translate-y-full');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            menuOverlay.classList.remove('opacity-100');
+            mobileMenu.classList.add('translate-y-full');
+            setTimeout(() => {
+                menuOverlay.classList.add('hidden');
+            }, 400);
+            document.body.style.overflow = '';
+        }
+
+        menuBtn.addEventListener('click', openMobileMenu);
+        menuOverlay.addEventListener('click', closeMobileMenu);
+
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            const isActive = el.classList.contains('dropdown-active');
+            document.querySelectorAll('.dropdown-active').forEach(d => d.classList.remove('dropdown-active'));
+            if (!isActive) el.classList.add('dropdown-active');
+        }
+
+        function selectOption(labelId, value, dropdownId) {
+            document.getElementById(labelId).textContent = value;
+            document.getElementById(labelId).style.color = '#C5A059';
+            document.getElementById(dropdownId).classList.remove('dropdown-active');
+        }
+
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('#type-dropdown') && !e.target.closest('#status-dropdown')) {
+                document.querySelectorAll('.dropdown-active').forEach(d => d.classList.remove('dropdown-active'));
+            }
+        });
+
+        function openDetails(title, type, price, area, location, status) {
+            document.getElementById('m-title').innerText = title;
+            document.getElementById('m-type').innerText = type;
+            document.getElementById('m-price').innerText = price;
+            document.getElementById('m-area').innerText = area;
+            document.getElementById('m-location').innerText = location;
+            document.getElementById('m-status').innerText = status;
+
+            const modal = document.getElementById('detailsModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDetails() {
+            const modal = document.getElementById('detailsModal');
+            const content = document.getElementById('modalContent');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function openContactModal() {
+            const modal = document.getElementById('contactModal');
+            const content = document.getElementById('contactContent');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeContactModal() {
+            const modal = document.getElementById('contactModal');
+            const content = document.getElementById('contactContent');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                if(document.getElementById('detailsModal').classList.contains('opacity-0')) {
+                    document.body.style.overflow = '';
+                }
+            }, 300);
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
+
